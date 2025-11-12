@@ -23,7 +23,15 @@ namespace ToDoApi.Extensions
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<JwtService>();
             services.AddScoped<IProductModelService, ProductModelService>();
+                     
+            services.AddScoped<IEmailService, SmtpEmailService>();
 
+            // Strategies
+            services.AddScoped<EmailSendStrategy>();
+
+            // **Factory & Manager**
+            services.AddScoped<ISendStrategyFactory, SendStrategyFactory>(); // <--- Missing line
+            services.AddScoped<INotificationManager, NotificationManager>();
             return services;
         }
     }

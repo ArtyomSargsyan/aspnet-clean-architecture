@@ -2,15 +2,16 @@
 bin/
 obj/
 Logs/
-
 # User-specific files
 .vscode/
 *.user
 *.suo
-
 # Environment files
 .env
-
 # Dependency directories
 node_modules/
 packages/
+# Configuration files
+appsettings.Development.json
+appsettings.json
+appsettings.*.json

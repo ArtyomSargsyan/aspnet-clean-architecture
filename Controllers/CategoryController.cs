@@ -18,7 +18,6 @@ namespace ToDoApi.Controllers
             _service = service;
         }
 
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories()
         {
@@ -29,7 +28,6 @@ namespace ToDoApi.Controllers
            
            return Ok(categoriesDto);
         }
-
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CategoryDto>> GetCategory(int id)
