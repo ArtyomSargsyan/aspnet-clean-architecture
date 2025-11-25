@@ -6,6 +6,7 @@ using ToDoApi.Services.Auth;
 using ToDoApi.Services.Categories;
 using ToDoApi.Services.Products;
 using ToDoApi.Services.ProductModel;
+using ToDoApi.Infrastructure.Storage;
 
 namespace ToDoApi.Extensions
 {
@@ -28,6 +29,9 @@ namespace ToDoApi.Extensions
 
             // Strategies
             services.AddScoped<EmailSendStrategy>();
+
+            //Dictionary
+            services.AddScoped<IBookStore, InMemoryBookStore>();
 
             // **Factory & Manager**
             services.AddScoped<ISendStrategyFactory, SendStrategyFactory>(); // <--- Missing line
