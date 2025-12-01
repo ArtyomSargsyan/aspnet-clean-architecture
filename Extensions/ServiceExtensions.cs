@@ -7,6 +7,10 @@ using ToDoApi.Services.Categories;
 using ToDoApi.Services.Products;
 using ToDoApi.Services.ProductModel;
 using ToDoApi.Infrastructure.Storage;
+using ToDoApi.Repositories.Pages;
+using MediatR;
+using ToDoApi.Extensions;
+
 
 namespace ToDoApi.Extensions
 {
@@ -18,6 +22,7 @@ namespace ToDoApi.Extensions
             services.AddScoped<InterfaceProductRepository, ProductRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IPageRepository, InMemoryPageRepository>();
 
             // Services
             services.AddScoped<IProdcutService, ProductService>();
@@ -33,9 +38,16 @@ namespace ToDoApi.Extensions
             //Dictionary
             services.AddScoped<IBookStore, InMemoryBookStore>();
 
-            // **Factory & Manager**
-            services.AddScoped<ISendStrategyFactory, SendStrategyFactory>(); // <--- Missing line
+            // Factory & Manager**
+            services.AddScoped<ISendStrategyFactory, SendStrategyFactory>(); 
             services.AddScoped<INotificationManager, NotificationManager>();
+
+            // MediatR
+            services.AddMediatR(cfg =>
+                cfg.RegisterServicesFromAssembly(typeof(GetAllPagesHandler).Assembly));
+
+            // AutoMapper
+            services.AddAutoMapper(typeof(MappingProfile));
             return services;
         }
     }
