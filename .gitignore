@@ -11,6 +11,7 @@ Logs/
 # Dependency directories
 node_modules/
 packages/
+.vs/*
 # Configuration files
 appsettings.Development.json
 appsettings.json
