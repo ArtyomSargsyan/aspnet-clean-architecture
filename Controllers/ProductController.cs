@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Threading;
+using System.Threading.Tasks;
 using ToDoApi.DTO;
 
 namespace ToDoApi.Controllers
@@ -18,7 +20,7 @@ namespace ToDoApi.Controllers
             _logger = logger;
         }
 
-        [Authorize]
+      //  [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -26,6 +28,7 @@ namespace ToDoApi.Controllers
             _logger.LogInformation("Fetched {count} products-test", items.Count());
             return Ok(items);
         }
+
 
         [HttpGet("paged")]
         public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
@@ -47,12 +50,14 @@ namespace ToDoApi.Controllers
             var items = await _service.GetProductNamesAndPricesAsync();
             return Ok(items);
         }
+
         [HttpGet("count-per-category")]
         public async Task<IActionResult> GetProductCountPerCategory()
         {
             var items = await _service.GetProductCountPerCategory();
             return Ok(items);
         }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -84,7 +89,6 @@ namespace ToDoApi.Controllers
             var deleted = await _service.DeleteAsync(id);
             return deleted ? NoContent() : NotFound();
         }
-        
         
     }
 }
