@@ -1,13 +1,6 @@
 using ToDoApi.DTO;
 using ToDoApi.Models;
 using ToDoApi.Repositories.Products;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using System.IO;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace ToDoApi.Services.Products
 {

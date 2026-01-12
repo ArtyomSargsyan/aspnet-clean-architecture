@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ToDoApi.DTO
-{
+namespace ToDoApi.DTO;
+
     public class UserRegisterDto
     {
         [Required, MaxLength(50)]
@@ -28,4 +28,4 @@ namespace ToDoApi.DTO
         public string Token { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
     }
-}
+
