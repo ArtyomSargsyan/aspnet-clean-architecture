@@ -9,7 +9,7 @@ namespace ToDoApi.Repositories.Products
     {
         Task<IEnumerable<Product>> GetAllAsync();
          Task<(IEnumerable<Product> Items, int TotalCount)> GetPagedAsync(int page, int pageSize);
-        Task<IEnumerable<Product>> GetProductSmoll();
+        Task<IEnumerable<ProductSmallDto>> GetProductSmoll();
         Task<IEnumerable<ProductSmallDto>> GetProductNamesAndPricesAsync();
         Task<List<CategoryProductCountDto>> GetProductCountPerCategory();
         Task<Product?> GetByIdAsync(long id);

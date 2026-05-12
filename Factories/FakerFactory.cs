@@ -13,8 +13,8 @@ namespace ToDoApi.Factories
                 .RuleFor(u => u.UserName, f => f.Person.UserName)
                 .RuleFor(u => u.Email, f => f.Internet.Email())
                 .RuleFor(u => u.PasswordHash, f => f.Internet.Password())
-                .RuleFor(u => u.CreatedAt, f => f.Date.Past(1))
-                .RuleFor(u => u.UpdatedAt, f => f.Date.Recent(30))
+                .RuleFor(u => u.CreatedAt, f => f.Date.Past(1).ToUniversalTime())
+                .RuleFor(u => u.UpdatedAt, f => f.Date.Recent(30).ToUniversalTime())
                 .Generate(count);
         }
 
@@ -22,8 +22,8 @@ namespace ToDoApi.Factories
         {
             return new Faker<Category>()
                 .RuleFor(c => c.Name, f => f.Commerce.Categories(1)[0])
-                .RuleFor(c => c.CreatedAt, f => f.Date.Past(1))
-                .RuleFor(c => c.UpdatedAt, f => f.Date.Recent(30))
+                .RuleFor(c => c.CreatedAt, f => f.Date.Past(1).ToUniversalTime())
+                .RuleFor(c => c.UpdatedAt, f => f.Date.Recent(30).ToUniversalTime())
                 .Generate(count);
         }
 
@@ -33,8 +33,8 @@ namespace ToDoApi.Factories
                 .RuleFor(p => p.Name, f => f.Commerce.ProductName())
                 .RuleFor(p => p.Price, f => decimal.Parse(f.Commerce.Price()))
                 .RuleFor(p => p.Color, f => f.Commerce.Color())
-                .RuleFor(p => p.CreatedAt, f => f.Date.Past(1))
-                .RuleFor(p => p.UpdatedAt, f => f.Date.Recent(30));
+                .RuleFor(p => p.CreatedAt, f => f.Date.Past(1).ToUniversalTime())
+                .RuleFor(p => p.UpdatedAt, f => f.Date.Recent(30).ToUniversalTime());
 
             var products = new List<Product>();
             var random = new Random();

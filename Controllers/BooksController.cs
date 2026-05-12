@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using ToDoApi.Domain;
 using ToDoApi.Infrastructure.Storage;
 
-namespace ToDoApi.Controllers
-{
+namespace ToDoApi.Controllers;
+
     [ApiController]
     [Route("api/[controller]")]
     public class BooksController : ControllerBase
@@ -49,4 +49,4 @@ namespace ToDoApi.Controllers
             return deleted ? NoContent() : NotFound();
         }
     }
-}
+
