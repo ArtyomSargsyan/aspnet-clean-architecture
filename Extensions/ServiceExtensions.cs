@@ -1,4 +1,7 @@
+using FluentValidation;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using ToDoApi.Behaviors;
 using ToDoApi.Repositories.Categories;
 using ToDoApi.Repositories.Products;
 using ToDoApi.Repositories.Users;
@@ -20,7 +23,7 @@ namespace ToDoApi.Extensions
             services.AddScoped<IUserRepository, UserRepository>();
 
             // Services
-            services.AddScoped<IProdcutService, ProductService>();
+            services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<JwtService>();
             services.AddScoped<IProductModelService, ProductModelService>();
@@ -36,6 +39,17 @@ namespace ToDoApi.Extensions
             // **Factory & Manager**
             services.AddScoped<ISendStrategyFactory, SendStrategyFactory>(); // <--- Missing line
             services.AddScoped<INotificationManager, NotificationManager>();
+
+            services.AddErrorHandling();
+
+            services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
+            services.AddMediatR(cfg =>
+            {
+               //Mediator
+                cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+                cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            });
             return services;
         }
     }

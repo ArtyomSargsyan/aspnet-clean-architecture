@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Threading;
 using System.Threading.Tasks;
 using ToDoApi.DTO;
+using ToDoApi.Services.Products;
 
 namespace ToDoApi.Controllers
 {
@@ -11,10 +12,10 @@ namespace ToDoApi.Controllers
     [Authorize(Roles = "Admin")] 
     public class ProductsController : ControllerBase
     {
-        private readonly IProdcutService _service;
+        private readonly IProductService _service;
         private readonly ILogger<ProductsController> _logger;
 
-        public ProductsController(IProdcutService service, ILogger<ProductsController> logger)
+        public ProductsController(IProductService service, ILogger<ProductsController> logger)
         {
             _service = service;
             _logger = logger;

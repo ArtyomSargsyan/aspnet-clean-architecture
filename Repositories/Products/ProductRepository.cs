@@ -33,10 +33,15 @@ namespace ToDoApi.Repositories.Products
             return (items, totalCount);
         }
 
-        public async Task<IEnumerable<Product>> GetProductSmoll()
+        public async Task<IEnumerable<ProductSmallDto>> GetProductSmoll()
         {
             return await _context.Products
                                  .Where(p => p.Price > 1000)
+                                 .Select(p => new ProductSmallDto
+                                 {
+                                     Name = p.Name,
+                                     Price = p.Price
+                                 })
                                  .ToListAsync();
         }
 

@@ -4,7 +4,7 @@ using ToDoApi.Repositories.Products;
 
 namespace ToDoApi.Services.Products
 {
-    public class ProductService : IProdcutService
+    public class ProductService : IProductService
     {
         private readonly InterfaceProductRepository _repo;
         private readonly IWebHostEnvironment _env;
@@ -30,7 +30,7 @@ namespace ToDoApi.Services.Products
             };
         }
 
-        public async Task<IEnumerable<Product>> GetProductSmoll()
+        public async Task<IEnumerable<ProductSmallDto>> GetProductSmoll()
             => await _repo.GetProductSmoll();
         public async Task<IEnumerable<ProductSmallDto>> GetProductNamesAndPricesAsync()
             => await _repo.GetProductNamesAndPricesAsync();
