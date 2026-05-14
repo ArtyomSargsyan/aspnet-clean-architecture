@@ -1,49 +1,60 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using ToDoApi.Models;
 
-namespace ToDoApi.Services.Auth
+namespace ToDoApi.Services.Auth;
+
+public sealed class JwtService(IConfiguration config, TimeProvider? timeProvider = null)
 {
-    public class JwtService
+    private const int MinKeyBytes = 32;
+
+    private readonly string       _key         = ValidateKey(config["Jwt:Key"]);
+    private readonly string       _issuer      = config["Jwt:Issuer"]   ?? string.Empty;
+    private readonly string       _audience    = config["Jwt:Audience"] ?? string.Empty;
+    private readonly int          _expiryHours = int.TryParse(config["Jwt:ExpireHours"], out var h) ? h : 2;
+    private readonly TimeProvider _time        = timeProvider ?? TimeProvider.System;
+
+    public string GenerateToken(User user)
     {
-        private readonly IConfiguration _config;
-        private readonly int _expiryHours;
+        // C# 12 collection expression instead of `new[]`
+        Claim[] claims =
+        [
+            new(JwtRegisteredClaimNames.Sub,        user.Id.ToString()),
+            new(JwtRegisteredClaimNames.UniqueName, user.UserName),
+            new(JwtRegisteredClaimNames.Email,      user.Email),
+            new("Role",                             user.Role ?? "User"),
+        ];
 
-        public JwtService(IConfiguration config)
-        {
-            _config = config;
-            _expiryHours = int.TryParse(_config["Jwt:ExpiryHours"], out var h) ? h : 2;
-        }
+        var signingKey  = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_key));
+        var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
-        public string GenerateToken(User user)
-        {
-            // 1. Create claims
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("Role", user.Role ?? "User")
-                
-            };
+        // TimeProvider.GetUtcNow() returns DateTimeOffset — no implicit UTC drift.
+        var now = _time.GetUtcNow().UtcDateTime;
 
-            // 2. Signing credentials
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var token = new JwtSecurityToken(
+            issuer:             _issuer,
+            audience:           _audience,
+            claims:             claims,
+            expires:            now.AddHours(_expiryHours),
+            signingCredentials: credentials);
 
-            // 3. Create token
-            var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(_expiryHours),
-                signingCredentials: creds
-            );
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
 
-            // 4. Write token as string
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+    // Static helper: can be called from a field initializer (no `this` needed).
+    private static string ValidateKey(string? key)
+    {
+        if (string.IsNullOrWhiteSpace(key))
+            throw new InvalidOperationException(
+                "JWT key is missing or empty. Provide 'Jwt:Key' via environment variables or user secrets — never in appsettings.json.");
+
+        if (Encoding.UTF8.GetByteCount(key) < MinKeyBytes)
+            throw new InvalidOperationException(
+                $"JWT key is too short. HMAC-SHA256 requires at least {MinKeyBytes} bytes ({MinKeyBytes * 8} bits).");
+
+        return key;
     }
 }
