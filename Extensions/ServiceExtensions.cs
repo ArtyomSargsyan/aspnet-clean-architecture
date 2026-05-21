@@ -9,6 +9,7 @@ using ToDoApi.Services.Auth;
 using ToDoApi.Services.Categories;
 using ToDoApi.Services.Products;
 using ToDoApi.Services.ProductModel;
+using ToDoApi.Services.Contacts;
 
 namespace ToDoApi.Extensions;
 
@@ -16,7 +17,7 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        // ── Infrastructure ────────────────────────────────────────────────────
+        // ── Infrastructure
 
         // Real clock for production; tests inject FakeTimeProvider instead.
         services.AddSingleton(TimeProvider.System);
@@ -37,7 +38,7 @@ public static class ServiceExtensions
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IProductModelService, ProductModelService>();
         services.AddScoped<IEmailService, SmtpEmailService>();
-
+        services.AddScoped<IContactService, ContactService>();
         // ── Strategies / Factories / Managers ─────────────────────────────────
 
         services.AddScoped<EmailSendStrategy>();

@@ -13,6 +13,7 @@ namespace ToDoApi.Data
         public DbSet<Currency> Currencies { get; set; } = null!;
         public DbSet<ProductModel> ProductModels { get; set; } = null!;
         public DbSet<Article> Articles { get; set; } = null!;
+        public DbSet<Contact> Contacts { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -21,13 +22,13 @@ namespace ToDoApi.Data
                 .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Cascade);
-                 
-           // ProductModel → Product relation
+
+            // ProductModel → Product relation
             modelBuilder.Entity<ProductModel>()
-                .HasOne(pm => pm.Product)                 
-                .WithMany(p => p.ProductModels)          
-                .HasForeignKey(pm => pm.ProductId)       
-                .OnDelete(DeleteBehavior.Cascade); 
+                .HasOne(pm => pm.Product)
+                .WithMany(p => p.ProductModels)
+                .HasForeignKey(pm => pm.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
