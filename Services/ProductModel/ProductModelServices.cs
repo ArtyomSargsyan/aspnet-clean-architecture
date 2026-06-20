@@ -19,10 +19,10 @@ namespace ToDoApi.Services.ProductModel
             return await _context.ProductModels
                 .Select(p => new ProductModelDto
                 {
-                    Id =(int) p.Id,
+                    Id = p.Id,
                     Name = p.Name,
                     Color = p.Color,
-                    ProductId = (int) p.ProductId
+                    ProductId = p.ProductId
                 })
                 .ToListAsync();
         }
@@ -34,10 +34,10 @@ namespace ToDoApi.Services.ProductModel
 
             return new ProductModelDto
             {
-                Id = (int)product.Id,
+                Id = product.Id,
                 Name = product.Name,
                 Color = product.Color,
-                ProductId =(int) product.ProductId
+                ProductId = product.ProductId
             };
         }
 
@@ -55,14 +55,14 @@ namespace ToDoApi.Services.ProductModel
 
             return new ProductModelDto
             {
-                Id = (int) product.Id,
+                Id = product.Id,
                 Name = product.Name,
                 Color = product.Color,
-                ProductId = (int) product.ProductId
+                ProductId = product.ProductId
             };
         }
 
-       public async Task<ProductModelDto?> UpdateAsync(int id, UpdateProductModelDto dto)
+        public async Task<ProductModelDto?> UpdateAsync(int id, UpdateProductModelDto dto)
         {
             var product = await _context.ProductModels.FindAsync(id);
             if (product == null) return null;
@@ -75,13 +75,12 @@ namespace ToDoApi.Services.ProductModel
 
             return new ProductModelDto
             {
-                Id = (int) product.Id,
+                Id = product.Id,
                 Name = product.Name,
                 Color = product.Color,
-                ProductId = (int) product.ProductId
+                ProductId = product.ProductId
             };
         }
-
 
         public async Task<bool> DeleteAsync(int id)
         {

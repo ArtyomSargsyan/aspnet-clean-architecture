@@ -2,14 +2,16 @@ using FluentValidation;
 using MediatR;
 using ToDoApi.Behaviors;
 using ToDoApi.Infrastructure.Storage;
+using ToDoApi.Repositories;
 using ToDoApi.Repositories.Categories;
 using ToDoApi.Repositories.Products;
 using ToDoApi.Repositories.Users;
 using ToDoApi.Services.Auth;
 using ToDoApi.Services.Categories;
-using ToDoApi.Services.Products;
-using ToDoApi.Services.ProductModel;
+using ToDoApi.Services.Articles;
 using ToDoApi.Services.Contacts;
+using ToDoApi.Services.ProductModel;
+using ToDoApi.Services.Products;
 
 namespace ToDoApi.Extensions;
 
@@ -28,12 +30,13 @@ public static class ServiceExtensions
 
         // ── Repositories ──────────────────────────────────────────────────────
 
-        services.AddScoped<InterfaceProductRepository, ProductRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
 
         // ── Domain services ───────────────────────────────────────────────────
 
+        services.AddScoped<IArticleService, ArticleService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IProductModelService, ProductModelService>();
@@ -44,9 +47,13 @@ public static class ServiceExtensions
         services.AddScoped<EmailSendStrategy>();
         services.AddScoped<ISendStrategyFactory, SendStrategyFactory>();
         services.AddScoped<INotificationManager, NotificationManager>();
+        // ---- Orders
+        services.AddScoped<IOrderRepository, OrderRepository>();
+
+        // --- Coupons
+        services.AddScoped<ICouponRepository, CouponRepository>();
 
         // ── Storage ───────────────────────────────────────────────────────────
-
         services.AddScoped<IBookStore, InMemoryBookStore>();
 
         // ── Cross-cutting concerns ─────────────────────────────────────────────

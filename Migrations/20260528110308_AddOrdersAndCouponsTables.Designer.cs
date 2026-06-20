@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ToDoApi.Data;
@@ -11,9 +12,11 @@ using ToDoApi.Data;
 namespace ToDoApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260528110308_AddOrdersAndCouponsTables")]
+    partial class AddOrdersAndCouponsTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -59,7 +62,7 @@ namespace ToDoApi.Migrations
                     b.Property<decimal>("FinalPrice")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("SubTotal")
+                    b.Property<decimal>("OriginalPrice")
                         .HasColumnType("numeric");
 
                     b.Property<int>("ProductId")
