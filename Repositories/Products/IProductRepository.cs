@@ -5,16 +5,16 @@ using System.Threading.Tasks;
 
 namespace ToDoApi.Repositories.Products
 {
-    public interface InterfaceProductRepository
+    public interface IProductRepository
     {
         Task<IEnumerable<Product>> GetAllAsync();
          Task<(IEnumerable<Product> Items, int TotalCount)> GetPagedAsync(int page, int pageSize);
-        Task<IEnumerable<ProductSmallDto>> GetProductSmoll();
+        Task<IEnumerable<ProductSmallDto>> GetProductSummariesAsync();
         Task<IEnumerable<ProductSmallDto>> GetProductNamesAndPricesAsync();
         Task<List<CategoryProductCountDto>> GetProductCountPerCategory();
-        Task<Product?> GetByIdAsync(long id);
+        Task<Product?> GetByIdAsync(int id);
         Task<Product> AddAsync(Product product);
         Task<Product?> UpdateAsync(Product product);
-        Task<bool> DeleteAsync(long id);
+        Task<bool> DeleteAsync(int id);
     }
 }

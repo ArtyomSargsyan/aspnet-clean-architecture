@@ -1,46 +1,47 @@
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using ToDoApi.Features.Articles.Commands;
-using ToDoApi.Features.Articles.Queries;
+using ToDoApi.DTO;
+using ToDoApi.Services.Articles;
 
 namespace ToDoApi.Controllers;
+
+// MVC Controller approach — Controller → Service → DbContext
+// Validation via DataAnnotations ([Required], [MinLength], etc.)
+// Compare with Minimal API + MediatR approach in /Endpoints/
 
 [ApiController]
 [Route("api/[controller]")]
 public class ArticleController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly IArticleService _service;
 
-    public ArticleController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateArticleCommand command)
-    {
-        var id = await _mediator.Send(command);
-        return CreatedAtAction(nameof(GetById), new { id }, id);
-    }
+    public ArticleController(IArticleService service) => _service = service;
 
     [HttpGet]
+    [ProducesResponseType(typeof(List<ArticleDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll()
-    {
-        var articles = await _mediator.Send(new GetAllArticlesQuery());
-        return Ok(articles);
-    }
+        => Ok(await _service.GetAllAsync());
 
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(int id)
+        => Ok(await _service.GetByIdAsync(id));
+
+    [HttpPost]
+    [ProducesResponseType(typeof(ArticleDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Create([FromBody] ArticleCreateRequest request)
     {
-        var article = await _mediator.Send(new GetArticleByIdQuery(id));
-        return Ok(article);
+        var created = await _service.CreateAsync(request);
+        return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
     [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
-        await _mediator.Send(new DeleteArticleCommand(id));
+        await _service.DeleteAsync(id);
         return NoContent();
     }
 }

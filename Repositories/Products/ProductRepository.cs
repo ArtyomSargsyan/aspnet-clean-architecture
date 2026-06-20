@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ToDoApi.Repositories.Products
 {
-    public class ProductRepository : InterfaceProductRepository
+    public class ProductRepository : IProductRepository
     {
         private readonly AppDbContext _context;
 
@@ -33,7 +33,7 @@ namespace ToDoApi.Repositories.Products
             return (items, totalCount);
         }
 
-        public async Task<IEnumerable<ProductSmallDto>> GetProductSmoll()
+        public async Task<IEnumerable<ProductSmallDto>> GetProductSummariesAsync()
         {
             return await _context.Products
                                  .Where(p => p.Price > 1000)
@@ -73,7 +73,7 @@ namespace ToDoApi.Repositories.Products
         .ToListAsync();
         } 
 
-        public async Task<Product?> GetByIdAsync(long id) =>
+        public async Task<Product?> GetByIdAsync(int id) =>
             await _context.Products.Include(p => p.Category)
                                    .FirstOrDefaultAsync(p => p.Id == id);
 
@@ -98,7 +98,7 @@ namespace ToDoApi.Repositories.Products
             return product1;
         }
 
-        public async Task<bool> DeleteAsync(long id)
+        public async Task<bool> DeleteAsync(int id)
         {
             var existing = await _context.Products.FindAsync(id);
             if (existing == null) return false;

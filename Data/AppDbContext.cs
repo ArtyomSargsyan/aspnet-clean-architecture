@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ToDoApi.Domain;
 using ToDoApi.Models;
 
 namespace ToDoApi.Data
@@ -14,6 +15,9 @@ namespace ToDoApi.Data
         public DbSet<ProductModel> ProductModels { get; set; } = null!;
         public DbSet<Article> Articles { get; set; } = null!;
         public DbSet<Contact> Contacts { get; set; } = null!;
+
+        public DbSet<Order> Orders { get; set; } = null!;
+        public DbSet<Coupon> Coupons { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

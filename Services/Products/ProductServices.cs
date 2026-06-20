@@ -6,10 +6,10 @@ namespace ToDoApi.Services.Products
 {
     public class ProductService : IProductService
     {
-        private readonly InterfaceProductRepository _repo;
+        private readonly IProductRepository _repo;
         private readonly IWebHostEnvironment _env;
 
-        public ProductService(InterfaceProductRepository repo, IWebHostEnvironment env)
+        public ProductService(IProductRepository repo, IWebHostEnvironment env)
             => (_repo, _env) = (repo, env);
 
         public async Task<IEnumerable<ProductDto>> GetAllProducts()
@@ -30,14 +30,14 @@ namespace ToDoApi.Services.Products
             };
         }
 
-        public async Task<IEnumerable<ProductSmallDto>> GetProductSmoll()
-            => await _repo.GetProductSmoll();
+        public async Task<IEnumerable<ProductSmallDto>> GetProductSummariesAsync()
+            => await _repo.GetProductSummariesAsync();
         public async Task<IEnumerable<ProductSmallDto>> GetProductNamesAndPricesAsync()
             => await _repo.GetProductNamesAndPricesAsync();
 
         public async Task<IEnumerable<CategoryProductCountDto>> GetProductCountPerCategory()
             => await _repo.GetProductCountPerCategory();    
-        public async Task<ProductDto?> GetByIdProduct(int id)
+        public async Task<ProductDto?> GetProductByIdAsync(int id)
         {
             var p = await _repo.GetByIdAsync(id);
             return p == null ? null : MapToDto(p);
@@ -92,7 +92,7 @@ namespace ToDoApi.Services.Products
 
         private static ProductDto MapToDto(Product p) => new()
         {
-            Id = (int) p.Id,
+            Id = p.Id,
             Name = p.Name,
             Price = p.Price,
             Color = p.Color,
