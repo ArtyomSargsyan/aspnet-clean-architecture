@@ -4,9 +4,10 @@
 #  Stages:
 #    restore     — NuGet + local tools cache layer (invalidated only on .csproj change)
 #    development — hot-reload via dotnet watch (dev compose target)
-#    migrator    — runs EF Core migrations then exits (both composes)
 #    build       — Release publish
-#    production  — minimal aspnet runtime, non-root user, healthcheck
+#    runtime     — shared aspnet Alpine base (migrator + production both extend this)
+#    migrator    — runs db.MigrateAsync() + DbSeeder.SeedAsync() then exits 0
+#    production  — serves HTTP; /health is live from first request
 # ══════════════════════════════════════════════════════════════════════════════
 
 # ── Stage 1: restore ─────────────────────────────────────────────────────────
@@ -25,12 +26,7 @@ COPY . .
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "watch", "run", "--urls", "http://+:8080"]
 
-# ── Stage 3: migrator ─────────────────────────────────────────────────────────
-FROM restore AS migrator
-COPY . .
-ENTRYPOINT ["dotnet", "ef", "database", "update"]
-
-# ── Stage 4: build / publish ─────────────────────────────────────────────────
+# ── Stage 3: build / publish ─────────────────────────────────────────────────
 FROM restore AS build
 ARG BUILD_VERSION=0.0.0
 COPY . .
@@ -41,17 +37,27 @@ RUN dotnet publish ToDoApi.csproj \
         /p:Version=${BUILD_VERSION} \
         /p:UseAppHost=false
 
-# ── Stage 5: production runtime ───────────────────────────────────────────────
-FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS production
+# ── Stage 4: shared runtime base ─────────────────────────────────────────────
+#  Both migrator and production copy from the same build artifact.
+#  Keeping it in a shared stage avoids duplicating the COPY instruction.
+FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS runtime
+WORKDIR /app
+COPY --from=build --chown=app:app /app/publish .
+USER app
+
+# ── Stage 5: migrator ─────────────────────────────────────────────────────────
+#  Runs db.MigrateAsync() then DbSeeder.SeedAsync() via the --migrate flag,
+#  then exits 0. No HTTP server starts — no /health race condition possible.
+FROM runtime AS migrator
+ENTRYPOINT ["dotnet", "ToDoApi.dll", "--migrate"]
+
+# ── Stage 6: production ───────────────────────────────────────────────────────
+FROM runtime AS production
 
 LABEL org.opencontainers.image.title="ToDoApi" \
       org.opencontainers.image.description=".NET 9 ToDo REST API" \
       org.opencontainers.image.licenses="MIT"
 
-WORKDIR /app
-COPY --from=build --chown=app:app /app/publish .
-
-USER app
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
