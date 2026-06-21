@@ -1,0 +1,95 @@
+name: todoapi-prod
+
+networks:
+  # Public-facing network — only the API is attached
+  frontend:
+    driver: bridge
+  # Internal-only network — DB is unreachable from outside Docker
+  backend:
+    driver: bridge
+    internal: true
+
+services:
+
+  # ── PostgreSQL ──────────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    env_file: ../.env.prod
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    networks:
+      - backend       # NOT attached to frontend — no external exposure
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ── EF Migration runner (runs once before api starts) ────────────────────────
+  migrator:
+    build:
+      context: ..
+      dockerfile: _docker/Dockerfile
+      target: migrator
+    env_file: ../.env.prod
+    networks:
+      - backend
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure:3
+
+  # ── API ─────────────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ..
+      dockerfile: _docker/Dockerfile
+      target: production
+    ports:
+      - "8080:8080"
+    env_file: ../.env.prod
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      db:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  pgdata_prod:

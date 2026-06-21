@@ -1,0 +1,81 @@
+name: todoapi-dev
+
+networks:
+  dev:
+    driver: bridge
+
+services:
+
+  # ── PostgreSQL ──────────────────────────────────────────────────────────────
+  db:
+    image: postgres:16-alpine
+    env_file: ../.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    networks:
+      - dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── EF Migration runner (runs once then exits) ────────────────────────────
+  migrator:
+    build:
+      context: ..
+      dockerfile: _docker/Dockerfile
+      target: migrator
+    env_file: ../.env
+    networks:
+      - dev
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure:3
+
+  # ── API (hot-reload via dotnet watch) ─────────────────────────────────────
+  api:
+    build:
+      context: ..
+      dockerfile: _docker/Dockerfile
+      target: development
+    ports:
+      - "8080:8080"
+    env_file: ../.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    volumes:
+      - ..:/src          # mount source for dotnet watch
+      - /src/obj         # keep container obj/ isolated from host
+      - /src/bin         # keep container bin/ isolated from host
+    networks:
+      - dev
+    depends_on:
+      db:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    restart: on-failure
+
+  # ── pgAdmin (DB UI) ─────────────────────────────────────────────────────────
+  pgadmin:
+    image: dpage/pgadmin4:8
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    networks:
+      - dev
+    depends_on:
+      - db
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  pgdata_dev:
+  pgadmin_data:

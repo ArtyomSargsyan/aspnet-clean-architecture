@@ -24,6 +24,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddApplicationServices();
 builder.Services.AddIdentityServices(builder.Configuration);
 
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>();
+
 var app = builder.Build();
 
 // 2. MIDDLEWARE PIPELINE 
@@ -46,6 +49,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // ENDPOINTS & CONTROLLERS MAPPING
+app.MapHealthChecks("/health");
 app.MapAllEndpoints();
 app.MapControllers();
 
