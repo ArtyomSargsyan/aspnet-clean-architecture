@@ -53,11 +53,6 @@ app.MapHealthChecks("/health");
 app.MapAllEndpoints();
 app.MapControllers();
 
-// DATABASE SEEDING 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await DbSeeder.SeedAsync(db);
-}
+if (await app.HandleMigrationArgsAsync(args)) return;
 
 app.Run();
