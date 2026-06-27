@@ -32,7 +32,7 @@ namespace ToDoApi.Controllers;
         public IActionResult Create(Book book)
         {
             _bookStore.Add(book);
-            return Ok(book);
+            return CreatedAtAction(nameof(GetById), new { id = book.Id }, book);
         }
 
         [HttpPut("{id}")]

@@ -54,7 +54,7 @@ public static class ServiceExtensions
         services.AddScoped<ICouponRepository, CouponRepository>();
 
         // ── Storage ───────────────────────────────────────────────────────────
-        services.AddScoped<IBookStore, InMemoryBookStore>();
+        services.AddSingleton<IBookStore, InMemoryBookStore>();
 
         // ── Cross-cutting concerns ─────────────────────────────────────────────
 

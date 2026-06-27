@@ -33,8 +33,11 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, Order>
         if (!string.IsNullOrWhiteSpace(request.CouponCode))
         {
             var coupon = await _couponRepository.GetByCodeAsync(request.CouponCode);
-            if (coupon == null)
+            if (coupon is null)
                 throw new ArgumentException("The provided coupon code does not exist.");
+
+            if (coupon.IsExpired)
+                throw new ArgumentException($"Coupon '{coupon.Code}' has expired on {coupon.ExpiresAt:yyyy-MM-dd}.");
 
             order.ApplyCoupon(coupon);
         }

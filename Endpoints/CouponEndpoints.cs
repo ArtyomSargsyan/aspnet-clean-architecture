@@ -10,18 +10,35 @@ public class CouponEndpoints : IEndpoint
         var group = app.MapGroup("/api/coupons")
                        .WithTags("Coupons");
 
-        // GET /api/coupons/{code}  — validate / fetch coupon by code
+        // GET /api/coupons?activeOnly=true
+        group.MapGet("/", async (ICouponRepository repo, bool activeOnly = false) =>
+        {
+            var coupons = await repo.GetAllAsync(activeOnly);
+            return Results.Ok(coupons);
+        })
+        .Produces<IReadOnlyList<Coupon>>();
+
+        // GET /api/coupons/{code}
         group.MapGet("/{code}", async (string code, ICouponRepository repo) =>
         {
             var coupon = await repo.GetByCodeAsync(code);
-            return coupon is null
-                ? Results.NotFound($"Coupon '{code}' not found.")
-                : Results.Ok(coupon);
+
+            if (coupon is null)
+                return Results.NotFound($"Coupon '{code}' not found.");
+
+            if (coupon.IsExpired)
+                return Results.Problem(
+                    title: "Coupon expired",
+                    detail: $"Coupon '{coupon.Code}' expired on {coupon.ExpiresAt:yyyy-MM-dd HH:mm} UTC.",
+                    statusCode: StatusCodes.Status410Gone);
+
+            return Results.Ok(coupon);
         })
         .Produces<Coupon>()
-        .Produces(StatusCodes.Status404NotFound);
+        .Produces(StatusCodes.Status404NotFound)
+        .Produces(StatusCodes.Status410Gone);
 
-        // POST /api/coupons  — create a new coupon
+        // POST /api/coupons
         group.MapPost("/", async (CreateCouponRequest request, ICouponRepository repo) =>
         {
             var existing = await repo.GetByCodeAsync(request.Code);
@@ -30,7 +47,7 @@ public class CouponEndpoints : IEndpoint
 
             try
             {
-                var coupon = new Coupon(request.Code, request.DiscountPercentage);
+                var coupon = new Coupon(request.Code, request.DiscountPercentage, request.ExpiresAt);
                 var created = await repo.CreateAsync(coupon);
                 return Results.Created($"/api/coupons/{created.Code}", created);
             }
@@ -45,4 +62,4 @@ public class CouponEndpoints : IEndpoint
     }
 }
 
-public record CreateCouponRequest(string Code, decimal DiscountPercentage);
+public record CreateCouponRequest(string Code, decimal DiscountPercentage, DateTime ExpiresAt);
